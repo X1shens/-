@@ -1,0 +1,21 @@
+2023-04-13 23:07:40,624 INFO [restartedMain] c.e.d.DemoApplication [StartupInfoLogger.java:51] Starting DemoApplication using Java 19.0.2 with PID 17244 (D:\Intellij IDEA\demo 2\demo\target\classes started by zengx in D:\Intellij IDEA\demo 2)
+2023-04-13 23:07:40,626 INFO [restartedMain] c.e.d.DemoApplication [SpringApplication.java:632] No active profile set, falling back to 1 default profile: "default"
+2023-04-13 23:07:41,459 INFO [restartedMain] o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker [PostProcessorRegistrationDelegate.java:409] Bean 'org.springframework.ws.config.annotation.DelegatingWsConfiguration' of type [org.springframework.ws.config.annotation.DelegatingWsConfiguration$$SpringCGLIB$$0] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-04-13 23:07:41,462 INFO [restartedMain] o.s.w.s.a.s.AnnotationActionEndpointMapping [AbstractAddressingEndpointMapping.java:239] Supporting [WS-Addressing August 2004, WS-Addressing 1.0]
+2023-04-13 23:07:41,631 INFO [restartedMain] o.s.b.w.e.t.TomcatWebServer [TomcatWebServer.java:108] Tomcat initialized with port(s): 8080 (http)
+2023-04-13 23:07:41,632 INFO [restartedMain] o.a.c.c.StandardService [DirectJDKLog.java:173] Starting service [Tomcat]
+2023-04-13 23:07:41,632 INFO [restartedMain] o.a.c.c.StandardEngine [DirectJDKLog.java:173] Starting Servlet engine: [Apache Tomcat/10.1.5]
+2023-04-13 23:07:41,763 INFO [restartedMain] o.a.c.c.C.[.[.[/] [DirectJDKLog.java:173] Initializing Spring embedded WebApplicationContext
+2023-04-13 23:07:41,763 INFO [restartedMain] o.s.b.w.s.c.ServletWebServerApplicationContext [ServletWebServerApplicationContext.java:291] Root WebApplicationContext: initialization completed in 1132 ms
+2023-04-13 23:07:43,395 INFO [main] c.e.d.LoggerTests [StartupInfoLogger.java:51] Starting LoggerTests using Java 19.0.2 with PID 13332 (started by zengx in D:\Intellij IDEA\demo 2\demo)
+2023-04-13 23:07:43,398 INFO [main] c.e.d.LoggerTests [SpringApplication.java:632] No active profile set, falling back to 1 default profile: "default"
+2023-04-13 23:07:43,399 INFO [restartedMain] o.s.b.a.w.s.WelcomePageHandlerMapping [WelcomePageHandlerMapping.java:56] Adding welcome page template: index
+2023-04-13 23:07:43,688 INFO [restartedMain] o.s.b.d.a.OptionalLiveReloadServer [OptionalLiveReloadServer.java:59] LiveReload server is running on port 35729
+2023-04-13 23:07:43,752 INFO [restartedMain] o.s.b.w.e.t.TomcatWebServer [TomcatWebServer.java:220] Tomcat started on port(s): 8080 (http) with context path ''
+2023-04-13 23:07:43,793 INFO [restartedMain] c.e.d.DemoApplication [StartupInfoLogger.java:57] Started DemoApplication in 3.665 seconds (process running for 75747.58)
+2023-04-13 23:07:43,797 INFO [restartedMain] o.s.b.d.a.ConditionEvaluationDeltaLoggingListener [ConditionEvaluationDeltaLoggingListener.java:63] Condition evaluation unchanged
+2023-04-13 23:07:44,984 INFO [main] o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker [PostProcessorRegistrationDelegate.java:409] Bean 'org.springframework.ws.config.annotation.DelegatingWsConfiguration' of type [org.springframework.ws.config.annotation.DelegatingWsConfiguration$$SpringCGLIB$$0] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2023-04-13 23:07:45,009 INFO [main] o.s.w.s.a.s.AnnotationActionEndpointMapping [AbstractAddressingEndpointMapping.java:239] Supporting [WS-Addressing August 2004, WS-Addressing 1.0]
+2023-04-13 23:07:45,974 INFO [main] o.s.b.a.w.s.WelcomePageHandlerMapping [WelcomePageHandlerMapping.java:56] Adding welcome page template: index
+2023-04-13 23:07:46,401 INFO [main] c.e.d.LoggerTests [StartupInfoLogger.java:57] Started LoggerTests in 3.923 seconds (process running for 6.504)
+2023-04-13 23:07:47,196 INFO [main] c.e.d.LoggerTests [LoggerTests.java:17] info log
