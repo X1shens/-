@@ -251,11 +251,18 @@ input, textarea { outline: none; }
   cursor: pointer;
   position: relative;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
-  animation: cardEnter 0.3s ease both;
 }
-@keyframes cardEnter {
-  from { opacity: 0; transform: translateY(12px) scale(0.92); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+.pool-card-hidden {
+  opacity: 0;
+  transform: perspective(600px) rotateY(180deg) scale(0.6);
+}
+.pool-card-spin-in {
+  animation: cardSpinIn 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.05) both;
+}
+@keyframes cardSpinIn {
+  0%   { opacity: 0; transform: perspective(600px) rotateY(180deg) scale(0.6); }
+  60%  { opacity: 1; transform: perspective(600px) rotateY(-15deg) scale(1.02); }
+  100% { opacity: 1; transform: perspective(600px) rotateY(0deg) scale(1); }
 }
 .pool-card:hover:not(.disabled):not(.selected) {
   transform: translateY(-6px) scale(1.04);
@@ -520,6 +527,59 @@ input, textarea { outline: none; }
 }
 .reading-desc { font-size: 13px; color: #cbd5e1; line-height: 1.65; margin-bottom: 4px; }
 .reading-desc-en { font-size: 11px; color: #64748b; line-height: 1.6; font-style: italic; }
+
+/* ---- Reading Summary ---- */
+.reading-summary {
+  background: linear-gradient(160deg, rgba(168,85,247,0.1) 0%, rgba(251,191,36,0.06) 100%);
+  border: 1.5px solid rgba(168,85,247,0.3);
+  border-radius: 14px;
+  padding: 18px 16px;
+  opacity: 0;
+  animation: fadeInUp 0.6s ease forwards;
+  margin-top: 4px;
+}
+.summary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.summary-label {
+  font-family: Georgia, serif;
+  font-size: 13px;
+  color: #fbbf24;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+.summary-tone {
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.tone-positive { background: rgba(74,222,128,0.2); color: #4ade80; }
+.tone-mixed    { background: rgba(251,191,36,0.2); color: #fbbf24; }
+.tone-challenging { background: rgba(239,68,68,0.2); color: #f87171; }
+.summary-category {
+  font-size: 10px;
+  color: #64748b;
+  letter-spacing: 0.06em;
+  margin-left: auto;
+}
+.summary-text {
+  font-size: 14px;
+  color: #e2e8f0;
+  line-height: 1.75;
+  margin-bottom: 10px;
+}
+.summary-text-en {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.65;
+  font-style: italic;
+}
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(14px); }
