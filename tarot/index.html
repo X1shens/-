@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Tarot - 塔罗占卜</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ========== Welcome Screen ========== -->
+    <div id="welcome-screen" class="screen active">
+      <div class="starfield"></div>
+      <div class="welcome-content">
+        <h1 id="welcome-title" class="welcome-title">TAROT</h1>
+        <p id="welcome-subtitle" class="welcome-subtitle">请开启今天的占卜 / Begin Today's Reading</p>
+        <button id="btn-start" class="btn btn-primary btn-glow">
+          开始占卜 / Start Reading
+        </button>
+        <button class="btn btn-secondary btn-collection" style="margin-top:12px;">
+          图鉴 / Collection
+        </button>
+      </div>
+    </div>
+
+    <!-- ========== Question Screen ========== -->
+    <div id="question-screen" class="screen">
+      <div class="screen-inner">
+        <div class="screen-header">
+          <button class="btn-icon btn-collection" aria-label="Collection">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+          </button>
+          <div id="count-display" class="count-display"></div>
+        </div>
+        <div class="question-container">
+          <h2 class="section-title">你想问什么 / What's Your Question</h2>
+          <textarea id="question-input" class="question-input" placeholder="请输入你想占卜的问题...&#10;Enter your question..." rows="4" maxlength="200"></textarea>
+          <button id="btn-submit-question" class="btn btn-primary btn-glow">
+            开始抽牌 / Draw Cards
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== Card Pool Screen ========== -->
+    <div id="pool-screen" class="screen">
+      <div class="screen-inner">
+        <h2 class="section-title pool-title">选择三张卡牌 / Choose 3 Cards</h2>
+        <div id="selected-count" class="selected-count"></div>
+        <div id="card-pool" class="card-grid"></div>
+      </div>
+    </div>
+
+    <!-- ========== Reveal Screen ========== -->
+    <div id="reveal-screen" class="screen">
+      <div class="screen-inner">
+        <div id="reveal-cards" class="reveal-row"></div>
+        <div id="reading-result" class="reading-result"></div>
+        <div id="action-buttons" class="action-buttons">
+          <button id="btn-continue" class="btn btn-primary">继续占卜 / Continue</button>
+          <button id="btn-exit" class="btn btn-secondary">退出 / Exit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== Collection Screen ========== -->
+    <div id="collection-screen" class="screen">
+      <div class="screen-inner">
+        <div class="collection-header">
+          <button id="btn-collection-back" class="btn-icon" aria-label="Back">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <h2 class="section-title">图鉴 / Collection</h2>
+        </div>
+        <div id="collection-stats" class="collection-stats"></div>
+        <div id="collection-grid" class="collection-grid"></div>
+      </div>
+    </div>
+
+    <!-- ========== Card Detail Modal ========== -->
+    <div id="card-modal" class="modal-overlay">
+      <div class="modal-content" id="modal-screenshot-target">
+        <button id="btn-close-modal" class="modal-close" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+        <div id="modal-card-art" class="modal-card-art"></div>
+        <div id="modal-card-info" class="modal-card-info"></div>
+        <div class="modal-actions">
+          <button id="btn-screenshot" class="btn btn-primary btn-screenshot">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px;">
+              <rect x="2" y="6" width="20" height="14" rx="2"/><circle cx="12" cy="13" r="4"/>
+              <path d="M8 6V4h8v2"/>
+            </svg>
+            截图分享 / Screenshot
+          </button>
+        </div>
+        <div id="screenshot-tip" class="screenshot-tip"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- External: html2canvas for screenshot (async, optional) -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" async defer></script>
+  <!-- App scripts -->
+  <script src="cards.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
