@@ -587,7 +587,7 @@
   var ringDragMoved = false;
   var ringAnimFrame = null;
   var ringAutoRotate = null;
-  var RING_RADIUS = 320;
+  var RING_RADIUS = 260;
   var ANGLE_PER_CARD = 360 / POOL_DISPLAY;
 
   // ==================== Screen: Card Pool ====================
@@ -615,38 +615,51 @@
     track.innerHTML = '';
     ringAngle = 0;
     cancelMomentum();
+    stopAutoRotate();
     updateSelectionCount();
 
+    // Create all cards starting in a stacked pile (no rotation, no translateZ)
+    var cards = [];
     state.drawnCards.forEach(function (card, idx) {
       var el = createEl('div', 'ring-card');
       el.setAttribute('data-index', idx);
-      var angle = idx * ANGLE_PER_CARD;
-      el.style.transform = 'rotateY(' + angle + 'deg) translateZ(' + RING_RADIUS + 'px)';
+      // Start as a stacked pile: all cards centered, slightly offset for depth
+      el.style.transform = 'rotateY(0deg) translateZ(0px) translateY(60px)';
+      el.style.opacity = '0';
+      el.style.transition = 'none';
       el.innerHTML = renderCardBack();
       el.addEventListener('click', function () {
         if (!ringDragMoved) selectCard(idx);
       });
       track.appendChild(el);
+      cards.push(el);
     });
 
-    // Entrance animation: spin from -360 to 0, then start auto-rotate
-    stopAutoRotate();
-    ringAngle = -360;
-    var entranceStart = Date.now();
-    var entranceDuration = 1600;
-    function animateEntrance() {
-      var elapsed = Date.now() - entranceStart;
-      var t = Math.min(elapsed / entranceDuration, 1);
-      var eased = 1 - Math.pow(1 - t, 3);
-      ringAngle = -360 * (1 - eased);
-      updateRingTransform();
-      if (t < 1) {
-        requestAnimationFrame(animateEntrance);
-      } else {
-        startAutoRotate();
-      }
-    }
-    requestAnimationFrame(animateEntrance);
+    updateRingTransform();
+
+    // Entrance: cards fly out one by one from the pile into ring formation
+    var totalCards = cards.length;
+    var flyDuration = 500; // ms per card transition
+    var staggerDelay = 20; // ms between each card starting
+    var totalTime = staggerDelay * (totalCards - 1) + flyDuration;
+
+    cards.forEach(function (el, idx) {
+      var delay = idx * staggerDelay;
+      setTimeout(function () {
+        var angle = idx * ANGLE_PER_CARD;
+        el.style.transition = 'transform ' + flyDuration + 'ms cubic-bezier(0.2, 0.8, 0.3, 1), opacity 0.3s ease';
+        el.style.opacity = '1';
+        el.style.transform = 'rotateY(' + angle + 'deg) translateZ(' + RING_RADIUS + 'px)';
+      }, 100 + delay);
+    });
+
+    // After all cards have landed, restore normal transition and start auto-rotate
+    setTimeout(function () {
+      cards.forEach(function (el) {
+        el.style.transition = '';
+      });
+      startAutoRotate();
+    }, 100 + totalTime + 100);
   }
 
   // ---- Auto-rotation (slow clockwise when idle) ----
