@@ -586,7 +586,8 @@
   var ringLastTime = 0;
   var ringDragMoved = false;
   var ringAnimFrame = null;
-  var RING_RADIUS = 350;
+  var ringAutoRotate = null;
+  var RING_RADIUS = 320;
   var ANGLE_PER_CARD = 360 / POOL_DISPLAY;
 
   // ==================== Screen: Card Pool ====================
@@ -628,7 +629,8 @@
       track.appendChild(el);
     });
 
-    // Entrance animation: spin from -360 to 0
+    // Entrance animation: spin from -360 to 0, then start auto-rotate
+    stopAutoRotate();
     ringAngle = -360;
     var entranceStart = Date.now();
     var entranceDuration = 1600;
@@ -638,9 +640,28 @@
       var eased = 1 - Math.pow(1 - t, 3);
       ringAngle = -360 * (1 - eased);
       updateRingTransform();
-      if (t < 1) requestAnimationFrame(animateEntrance);
+      if (t < 1) {
+        requestAnimationFrame(animateEntrance);
+      } else {
+        startAutoRotate();
+      }
     }
     requestAnimationFrame(animateEntrance);
+  }
+
+  // ---- Auto-rotation (slow clockwise when idle) ----
+  function startAutoRotate() {
+    stopAutoRotate();
+    ringAutoRotate = setInterval(function () {
+      if (!ringDragging) {
+        ringAngle -= 0.15;
+        updateRingTransform();
+      }
+    }, 16);
+  }
+
+  function stopAutoRotate() {
+    if (ringAutoRotate) { clearInterval(ringAutoRotate); ringAutoRotate = null; }
   }
 
   function updateRingTransform() {
@@ -678,7 +699,7 @@
 
     vp.addEventListener('touchend', function () {
       ringDragging = false;
-      if (Math.abs(ringVelocity) > 0.3) applyMomentum();
+      if (Math.abs(ringVelocity) > 0.3) { applyMomentum(); } else { startAutoRotate(); }
     });
 
     vp.addEventListener('mousedown', function (e) {
@@ -708,12 +729,16 @@
     document.addEventListener('mouseup', function () {
       if (!ringDragging) return;
       ringDragging = false;
-      if (Math.abs(ringVelocity) > 0.3) applyMomentum();
+      if (Math.abs(ringVelocity) > 0.3) { applyMomentum(); } else { startAutoRotate(); }
     });
   }
 
   function applyMomentum() {
-    if (Math.abs(ringVelocity) < 0.05) { ringVelocity = 0; return; }
+    if (Math.abs(ringVelocity) < 0.05) {
+      ringVelocity = 0;
+      startAutoRotate();
+      return;
+    }
     ringAngle += ringVelocity;
     ringVelocity *= 0.96;
     updateRingTransform();

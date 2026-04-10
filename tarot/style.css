@@ -860,18 +860,18 @@ input, textarea { outline: none; }
 }
 
 /* ---- Collection Book List ---- */
-#collection-screen,
-#collection-detail-screen {
+#collection-screen.active,
+#collection-detail-screen.active {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
 }
 #collection-screen .screen-inner,
 #collection-detail-screen .screen-inner {
   padding-top: 16px;
   padding-bottom: 20px;
   justify-content: flex-start;
-  min-height: auto;
-  flex: 1;
+  min-height: 0;
 }
 .collection-list {
   width: 100%;
@@ -956,17 +956,18 @@ input, textarea { outline: none; }
 }
 #pool-screen {
   background: radial-gradient(ellipse at 50% 50%, #1a0840 0%, #0a0015 70%);
+  overflow: hidden;
 }
 .ring-viewport {
   width: 100%;
   flex: 1;
-  min-height: 280px;
-  perspective: 700px;
-  perspective-origin: 50% 45%;
+  min-height: 420px;
+  perspective: 800px;
+  perspective-origin: 50% 48%;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   cursor: grab;
   user-select: none;
@@ -975,28 +976,42 @@ input, textarea { outline: none; }
 }
 .ring-viewport:active { cursor: grabbing; }
 .ring-track {
-  width: 55px;
-  height: 82px;
+  width: 48px;
+  height: 72px;
   position: relative;
   transform-style: preserve-3d;
 }
 .ring-card {
   position: absolute;
-  width: 55px;
-  height: 82px;
+  width: 48px;
+  height: 72px;
   left: 0;
   top: 0;
-  border-radius: 7px;
+  border-radius: 6px;
   cursor: pointer;
   transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.3s, filter 0.3s;
 }
 .ring-card .card-back-face {
-  border-radius: 7px;
+  border-radius: 6px;
+  background: linear-gradient(160deg, #1e0a3e 0%, #14082a 50%, #0c0520 100%);
+  border-color: rgba(168,85,247,0.5);
+}
+.ring-card .card-back-pattern {
+  background:
+    repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(168,85,247,0.08) 4px, rgba(168,85,247,0.08) 5px),
+    repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(251,191,36,0.04) 4px, rgba(251,191,36,0.04) 5px);
 }
 .ring-card .card-back-inner {
-  width: 55%;
-  height: 55%;
+  width: 50%;
+  height: 50%;
 }
+/* Gradient color variation per card position */
+.ring-card:nth-child(6n+1) .card-back-face { background: linear-gradient(160deg, #2d1060 0%, #0c0520 100%); }
+.ring-card:nth-child(6n+2) .card-back-face { background: linear-gradient(160deg, #0c1a3d 0%, #0a0520 100%); }
+.ring-card:nth-child(6n+3) .card-back-face { background: linear-gradient(160deg, #1a0a40 0%, #0d0818 100%); }
+.ring-card:nth-child(6n+4) .card-back-face { background: linear-gradient(160deg, #0d2040 0%, #08051a 100%); }
+.ring-card:nth-child(6n+5) .card-back-face { background: linear-gradient(160deg, #201050 0%, #0a0515 100%); }
+.ring-card:nth-child(6n+6) .card-back-face { background: linear-gradient(160deg, #15103a 0%, #0c0620 100%); }
 .ring-card.selected {
   box-shadow: 0 0 24px rgba(251,191,36,0.7), 0 0 0 2px #fbbf24;
   filter: brightness(1.3);
@@ -1104,8 +1119,15 @@ input, textarea { outline: none; }
 }
 .confirm-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: center;
+  flex-wrap: wrap;
+  padding: 0 4px;
+}
+.confirm-actions .btn {
+  padding: 11px 20px;
+  font-size: 13px;
+  min-height: 42px;
 }
 
 /* ---- Mystical Reveal Background ---- */
