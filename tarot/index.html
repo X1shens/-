@@ -106,10 +106,23 @@
 
     <!-- ========== Card Pool Screen ========== -->
     <div id="pool-screen" class="screen">
-      <div class="screen-inner">
+      <div class="screen-inner pool-inner">
         <h2 class="section-title pool-title">选择三张卡牌 / Choose 3 Cards</h2>
         <div id="selected-count" class="selected-count"></div>
-        <div id="card-pool" class="card-grid"></div>
+        <div class="ring-viewport" id="ring-viewport">
+          <div class="ring-track" id="ring-track"></div>
+        </div>
+        <p class="ring-hint">左右滑动选牌 / Swipe to browse</p>
+      </div>
+      <div id="confirm-overlay" class="confirm-overlay">
+        <div class="confirm-box">
+          <h3 class="confirm-title">确认选择 / Confirm Selection</h3>
+          <div id="confirm-cards" class="confirm-cards"></div>
+          <div class="confirm-actions">
+            <button id="btn-confirm-yes" class="btn btn-primary btn-glow">确认抽取 / Confirm Draw</button>
+            <button id="btn-confirm-cancel" class="btn btn-secondary">重新选择 / Reselect</button>
+          </div>
+        </div>
       </div>
     </div>
 

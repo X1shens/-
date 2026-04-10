@@ -575,6 +575,19 @@
     }
   }
 
+  // ==================== Ring Carousel State ====================
+  var ringAngle = 0;
+  var ringDragging = false;
+  var ringStartX = 0;
+  var ringStartAngle = 0;
+  var ringVelocity = 0;
+  var ringLastX = 0;
+  var ringLastTime = 0;
+  var ringDragMoved = false;
+  var ringAnimFrame = null;
+  var RING_RADIUS = 400;
+  var ANGLE_PER_CARD = 360 / POOL_DISPLAY;
+
   // ==================== Screen: Card Pool ====================
   function showPool() {
     var question = $('#question-input').value.trim();
@@ -596,29 +609,126 @@
   }
 
   function renderPool() {
-    var grid = $('#card-pool');
-    grid.innerHTML = '';
+    var track = $('#ring-track');
+    track.innerHTML = '';
+    ringAngle = 0;
+    cancelMomentum();
     updateSelectionCount();
 
     state.drawnCards.forEach(function (card, idx) {
-      var el = createEl('div', 'pool-card pool-card-hidden');
+      var el = createEl('div', 'ring-card');
       el.setAttribute('data-index', idx);
+      var angle = idx * ANGLE_PER_CARD;
+      el.style.transform = 'rotateY(' + angle + 'deg) translateZ(' + RING_RADIUS + 'px)';
       el.innerHTML = renderCardBack();
-      el.addEventListener('click', function () { selectCard(idx); });
-      grid.appendChild(el);
-      // Staggered spin-in: each card rotates in one by one
-      setTimeout(function () {
-        el.classList.remove('pool-card-hidden');
-        el.classList.add('pool-card-spin-in');
-      }, 60 + idx * 80);
+      el.addEventListener('click', function () {
+        if (!ringDragMoved) selectCard(idx);
+      });
+      track.appendChild(el);
+    });
+
+    // Entrance animation: spin from -360 to 0
+    ringAngle = -360;
+    var entranceStart = Date.now();
+    var entranceDuration = 1600;
+    function animateEntrance() {
+      var elapsed = Date.now() - entranceStart;
+      var t = Math.min(elapsed / entranceDuration, 1);
+      var eased = 1 - Math.pow(1 - t, 3);
+      ringAngle = -360 * (1 - eased);
+      updateRingTransform();
+      if (t < 1) requestAnimationFrame(animateEntrance);
+    }
+    requestAnimationFrame(animateEntrance);
+  }
+
+  function updateRingTransform() {
+    var track = $('#ring-track');
+    if (track) track.style.transform = 'rotateY(' + ringAngle + 'deg)';
+  }
+
+  // ---- Ring Drag / Swipe ----
+  function initRingInteraction() {
+    var vp = $('#ring-viewport');
+    if (!vp) return;
+
+    vp.addEventListener('touchstart', function (e) {
+      cancelMomentum();
+      ringDragging = true;
+      ringDragMoved = false;
+      ringStartX = e.touches[0].clientX;
+      ringStartAngle = ringAngle;
+      ringLastX = ringStartX;
+      ringLastTime = Date.now();
+    }, { passive: true });
+
+    vp.addEventListener('touchmove', function (e) {
+      if (!ringDragging) return;
+      var x = e.touches[0].clientX;
+      if (Math.abs(x - ringStartX) > 5) ringDragMoved = true;
+      var now = Date.now();
+      var dt = now - ringLastTime;
+      if (dt > 0) ringVelocity = (x - ringLastX) / dt * 12;
+      ringLastX = x;
+      ringLastTime = now;
+      ringAngle = ringStartAngle + (x - ringStartX) * 0.25;
+      updateRingTransform();
+    }, { passive: true });
+
+    vp.addEventListener('touchend', function () {
+      ringDragging = false;
+      if (Math.abs(ringVelocity) > 0.3) applyMomentum();
+    });
+
+    vp.addEventListener('mousedown', function (e) {
+      cancelMomentum();
+      ringDragging = true;
+      ringDragMoved = false;
+      ringStartX = e.clientX;
+      ringStartAngle = ringAngle;
+      ringLastX = ringStartX;
+      ringLastTime = Date.now();
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      if (!ringDragging) return;
+      var x = e.clientX;
+      if (Math.abs(x - ringStartX) > 5) ringDragMoved = true;
+      var now = Date.now();
+      var dt = now - ringLastTime;
+      if (dt > 0) ringVelocity = (x - ringLastX) / dt * 12;
+      ringLastX = x;
+      ringLastTime = now;
+      ringAngle = ringStartAngle + (x - ringStartX) * 0.25;
+      updateRingTransform();
+    });
+
+    document.addEventListener('mouseup', function () {
+      if (!ringDragging) return;
+      ringDragging = false;
+      if (Math.abs(ringVelocity) > 0.3) applyMomentum();
     });
   }
 
+  function applyMomentum() {
+    if (Math.abs(ringVelocity) < 0.05) { ringVelocity = 0; return; }
+    ringAngle += ringVelocity;
+    ringVelocity *= 0.96;
+    updateRingTransform();
+    ringAnimFrame = requestAnimationFrame(applyMomentum);
+  }
+
+  function cancelMomentum() {
+    if (ringAnimFrame) { cancelAnimationFrame(ringAnimFrame); ringAnimFrame = null; }
+    ringVelocity = 0;
+  }
+
+  // ---- Card Selection & Confirmation ----
   function selectCard(idx) {
     if (state.selectedCards.indexOf(idx) !== -1) {
-      // Deselect
       state.selectedCards = state.selectedCards.filter(function (i) { return i !== idx; });
-      var el = $('.pool-card[data-index="' + idx + '"]');
+      var el = $('.ring-card[data-index="' + idx + '"]');
       if (el) el.classList.remove('selected');
       updateSelectionCount();
       return;
@@ -626,18 +736,12 @@
     if (state.selectedCards.length >= CARDS_PER_DRAW) return;
 
     state.selectedCards.push(idx);
-    var el = $('.pool-card[data-index="' + idx + '"]');
-    if (el) {
-      el.classList.add('selected');
-      // Ripple effect
-      var ripple = createEl('div', 'select-ripple');
-      el.appendChild(ripple);
-      setTimeout(function () { if (ripple.parentNode) ripple.parentNode.removeChild(ripple); }, 600);
-    }
+    var el = $('.ring-card[data-index="' + idx + '"]');
+    if (el) el.classList.add('selected');
     updateSelectionCount();
 
     if (state.selectedCards.length === CARDS_PER_DRAW) {
-      setTimeout(function () { showReveal(); }, 400);
+      setTimeout(function () { showConfirmDialog(); }, 400);
     }
   }
 
@@ -647,15 +751,37 @@
       el.textContent = '已选 ' + state.selectedCards.length + ' / ' + CARDS_PER_DRAW +
         '  |  Selected ' + state.selectedCards.length + ' / ' + CARDS_PER_DRAW;
     }
-    // Disable unselected cards if 3 selected
-    $$('.pool-card').forEach(function (card) {
-      var i = parseInt(card.getAttribute('data-index'));
-      if (state.selectedCards.length >= CARDS_PER_DRAW && state.selectedCards.indexOf(i) === -1) {
-        card.classList.add('disabled');
-      } else {
-        card.classList.remove('disabled');
-      }
+  }
+
+  function showConfirmDialog() {
+    var overlay = $('#confirm-overlay');
+    var container = $('#confirm-cards');
+    container.innerHTML = '';
+    state.selectedCards.forEach(function (idx, i) {
+      var slot = createEl('div', 'confirm-card-slot');
+      slot.innerHTML = renderCardBack() +
+        '<div class="confirm-card-label">' +
+          '<span>' + POSITIONS[i].cn + '</span>' +
+          '<span>' + POSITIONS[i].en + '</span>' +
+        '</div>';
+      container.appendChild(slot);
     });
+    overlay.classList.add('active');
+  }
+
+  function hideConfirmDialog() {
+    $('#confirm-overlay').classList.remove('active');
+    state.selectedCards.forEach(function (idx) {
+      var el = $('.ring-card[data-index="' + idx + '"]');
+      if (el) el.classList.remove('selected');
+    });
+    state.selectedCards = [];
+    updateSelectionCount();
+  }
+
+  function confirmDraw() {
+    $('#confirm-overlay').classList.remove('active');
+    showReveal();
   }
 
   // ==================== Screen: Reveal ====================
@@ -865,62 +991,17 @@
     var container = $('#collection-grid');
     container.innerHTML = '';
 
-    var groups = [
-      { suit:'major', label:{cn:'大阿尔卡纳',en:'Major Arcana'}, color:'#a855f7' },
-      { suit:'cups',  label:{cn:'圣杯',en:'Cups'},  color:'#60a5fa' },
-      { suit:'wands', label:{cn:'权杖',en:'Wands'}, color:'#f97316' },
-      { suit:'swords',label:{cn:'宝剑',en:'Swords'},color:'#eab308' },
-      { suit:'pentacles',label:{cn:'星币',en:'Pentacles'},color:'#4ade80' }
-    ];
     var totalOwned = 0;
-
-    groups.forEach(function (g) {
-      var cards = TAROT_CARDS.filter(function(c){ return c.suit === g.suit; });
-      var owned = cards.filter(function(c){ return (state.collection[c.id]||0)>0; }).length;
-      totalOwned += owned;
-
-      var groupEl = createEl('div', 'coll-group');
-      var header = createEl('div', 'coll-group-header');
-      header.style.borderLeftColor = g.color;
-      header.innerHTML =
-        '<div class="coll-group-info">' +
-          '<span class="coll-group-name" style="color:'+g.color+'">' + g.label.cn + ' / ' + g.label.en + '</span>' +
-          '<span class="coll-group-progress">' + owned + ' / ' + cards.length + '</span>' +
-        '</div>' +
-        '<div class="coll-group-bar"><div class="coll-group-fill" style="width:' + (cards.length?owned/cards.length*100:0) + '%;background:' + g.color + '"></div></div>' +
-        '<svg class="coll-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
-
-      var grid = createEl('div', 'coll-group-grid hidden');
-      cards.forEach(function (card) {
-        var count = state.collection[card.id] || 0;
-        var rarity = card.rarity || 'N';
-        var el = createEl('div', 'collection-card ' + (count > 0 ? 'owned rarity-' + rarity.toLowerCase() : 'unowned'));
-        el.innerHTML =
-          '<div class="collection-card-inner">' +
-            (count > 0 ? renderMiniCardFront(card) : '<div class="card-unknown">?</div>') +
-          '</div>' +
-          (count > 0 ? '<div class="collection-count">' + count + '</div>' : '');
-        if (count > 0) {
-          el.addEventListener('click', function () { showCardDetail(card, 'upright'); });
-        }
-        grid.appendChild(el);
-      });
-
-      header.addEventListener('click', function () {
-        grid.classList.toggle('hidden');
-        groupEl.classList.toggle('expanded');
-      });
-
-      groupEl.appendChild(header);
-      groupEl.appendChild(grid);
-      container.appendChild(groupEl);
+    TAROT_CARDS.forEach(function (c) {
+      if ((state.collection[c.id] || 0) > 0) totalOwned++;
     });
 
     var rarityStats = { SSR:{t:0,o:0}, SR:{t:0,o:0}, R:{t:0,o:0}, N:{t:0,o:0} };
-    TAROT_CARDS.forEach(function(c){
-      var r=c.rarity||'N'; rarityStats[r].t++;
-      if((state.collection[c.id]||0)>0) rarityStats[r].o++;
+    TAROT_CARDS.forEach(function (c) {
+      var r = c.rarity || 'N'; rarityStats[r].t++;
+      if ((state.collection[c.id] || 0) > 0) rarityStats[r].o++;
     });
+
     $('#collection-stats').innerHTML =
       '<div class="stats-total">' + totalOwned + ' / ' + TAROT_CARDS.length + '</div>' +
       '<div class="stats-detail">' +
@@ -929,6 +1010,30 @@
         'R: ' + rarityStats.R.o + '/' + rarityStats.R.t + '  ' +
         'N: ' + rarityStats.N.o + '/' + rarityStats.N.t +
       '</div>';
+
+    // Single set header (extensible for future card pool sets)
+    var setHeader = createEl('div', 'coll-set-header',
+      '<span class="coll-set-name">经典塔罗 / Classic Tarot</span>' +
+      '<span class="coll-set-progress">' + totalOwned + ' / ' + TAROT_CARDS.length + '</span>');
+    container.appendChild(setHeader);
+
+    // All 78 cards in one flat grid
+    var grid = createEl('div', 'coll-set-grid');
+    TAROT_CARDS.forEach(function (card) {
+      var count = state.collection[card.id] || 0;
+      var rarity = card.rarity || 'N';
+      var el = createEl('div', 'collection-card ' + (count > 0 ? 'owned rarity-' + rarity.toLowerCase() : 'unowned'));
+      el.innerHTML =
+        '<div class="collection-card-inner">' +
+          (count > 0 ? renderMiniCardFront(card) : '<div class="card-unknown">?</div>') +
+        '</div>' +
+        (count > 0 ? '<div class="collection-count">' + count + '</div>' : '');
+      if (count > 0) {
+        el.addEventListener('click', function () { showCardDetail(card, 'upright'); });
+      }
+      grid.appendChild(el);
+    });
+    container.appendChild(grid);
   }
 
   function renderMiniCardFront(card) {
@@ -1002,13 +1107,27 @@
     $('#btn-continue').addEventListener('click', continueDivination);
     $('#btn-exit').addEventListener('click', exitApp);
 
-    // Back from collection
+    // Back from collection -> always go to welcome/home
     $('#btn-collection-back').addEventListener('click', function () {
-      if (getAvailableDraws() > 0) showQuestion();
-      else {
-        show('#welcome-screen');
-      }
+      show('#welcome-screen');
+      $('#btn-start').textContent = getAvailableDraws() > 0 ? '开始占卜 / Start Reading' : '查看图鉴 / View Collection';
+      $('#btn-start').onclick = function () {
+        if (getAvailableDraws() > 0) {
+          var profile = loadProfile();
+          if (!profile) showProfile();
+          else showQuestion();
+        } else {
+          showCollection();
+        }
+      };
     });
+
+    // Ring carousel interaction
+    initRingInteraction();
+
+    // Confirm overlay
+    $('#btn-confirm-yes').addEventListener('click', confirmDraw);
+    $('#btn-confirm-cancel').addEventListener('click', hideConfirmDialog);
 
     // Profile screen
     populateProfileDropdowns();

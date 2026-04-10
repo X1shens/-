@@ -859,78 +859,198 @@ input, textarea { outline: none; }
   transform: rotateY(180deg) rotate(180deg);
 }
 
-/* ---- Collection Groups ---- */
-.coll-group {
-  width: 100%;
-  margin-bottom: 10px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: rgba(255,255,255,0.02);
+/* ---- Collection Sets ---- */
+#collection-screen .screen-inner {
+  padding-top: 10px;
+  padding-bottom: 20px;
+  justify-content: flex-start;
 }
-.coll-group-header {
+.coll-set-header {
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  cursor: pointer;
-  border-left: 3px solid;
-  transition: background 0.2s;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 8px 0;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(168,85,247,0.2);
 }
-.coll-group-header:hover { background: rgba(255,255,255,0.03); }
-.coll-group-info {
-  flex: 1;
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  min-width: 0;
-}
-.coll-group-name {
+.coll-set-name {
   font-family: Georgia, serif;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 15px;
+  color: #a855f7;
   letter-spacing: 0.04em;
-  white-space: nowrap;
+  font-weight: 600;
 }
-.coll-group-progress {
-  font-size: 11px;
+.coll-set-progress {
+  font-size: 12px;
   color: #64748b;
-  white-space: nowrap;
 }
-.coll-group-bar {
-  width: 100%;
-  height: 3px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 2px;
-  overflow: hidden;
-  order: 3;
-}
-.coll-group-fill {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 0.5s ease;
-}
-.coll-chevron {
-  color: #64748b;
-  transition: transform 0.3s ease;
-  flex-shrink: 0;
-}
-.coll-group.expanded .coll-chevron { transform: rotate(180deg); }
-.coll-group-grid {
+.coll-set-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
   gap: 8px;
-  padding: 4px 14px 14px;
-  transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
-  max-height: 2000px;
-  opacity: 1;
+  width: 100%;
 }
-.coll-group-grid.hidden {
-  max-height: 0;
-  opacity: 0;
-  padding-top: 0;
-  padding-bottom: 0;
+
+/* ---- Ring Carousel ---- */
+.pool-inner {
+  padding-top: 12px;
+  justify-content: flex-start;
+}
+#pool-screen {
+  background: radial-gradient(ellipse at 50% 50%, #1a0840 0%, #0a0015 70%);
+}
+.ring-viewport {
+  width: 100%;
+  flex: 1;
+  min-height: 280px;
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
+  position: relative;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+.ring-viewport:active { cursor: grabbing; }
+.ring-track {
+  width: 55px;
+  height: 82px;
+  position: relative;
+  transform-style: preserve-3d;
+}
+.ring-card {
+  position: absolute;
+  width: 55px;
+  height: 82px;
+  left: 0;
+  top: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: box-shadow 0.2s, filter 0.2s;
+}
+.ring-card .card-back-face {
+  border-radius: 7px;
+}
+.ring-card .card-back-inner {
+  width: 55%;
+  height: 55%;
+}
+.ring-card.selected {
+  box-shadow: 0 0 24px rgba(251,191,36,0.7), 0 0 0 2px #fbbf24;
+  filter: brightness(1.3);
+  z-index: 2;
+}
+.ring-card.selected::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 10px;
+  border: 2px solid #fbbf24;
+  animation: selectedPulse 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes selectedPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+.ring-hint {
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+  letter-spacing: 0.06em;
+  padding: 8px 0 4px;
+  animation: fadeIn 1s ease 1.5s both;
+}
+
+/* ---- Confirm Overlay ---- */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,5,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 80;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  padding: 20px;
+}
+.confirm-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+.confirm-box {
+  background: linear-gradient(160deg, #1a0940 0%, #0d0520 100%);
+  border: 1.5px solid rgba(251,191,36,0.4);
+  border-radius: 20px;
+  padding: 28px 24px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  transform: scale(0.85) translateY(20px);
+  transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(251,191,36,0.1);
+}
+.confirm-overlay.active .confirm-box {
+  transform: scale(1) translateY(0);
+}
+.confirm-title {
+  font-family: Georgia, serif;
+  font-size: 18px;
+  color: #fbbf24;
+  letter-spacing: 0.06em;
+  margin-bottom: 20px;
+}
+.confirm-cards {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.confirm-card-slot {
+  width: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  animation: confirmCardIn 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+.confirm-card-slot .card-back-face { height: 120px; }
+.confirm-card-slot:nth-child(2) { animation-delay: 0.15s; }
+.confirm-card-slot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes confirmCardIn {
+  0% { opacity: 0; transform: translateY(20px) scale(0.8); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.confirm-card-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 0 2px;
+}
+.confirm-card-label span:first-child {
+  font-size: 12px;
+  color: #fbbf24;
+  font-family: Georgia, serif;
+}
+.confirm-card-label span:last-child {
+  font-size: 9px;
+  color: #94a3b8;
+  letter-spacing: 0.06em;
+}
+.confirm-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
 }
 
 /* ---- Mystical Reveal Background ---- */
