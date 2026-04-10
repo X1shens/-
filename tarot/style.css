@@ -860,10 +860,18 @@ input, textarea { outline: none; }
 }
 
 /* ---- Collection Book List ---- */
-.collection-inner {
-  padding-top: 10px;
+#collection-screen,
+#collection-detail-screen {
+  display: flex;
+  flex-direction: column;
+}
+#collection-screen .screen-inner,
+#collection-detail-screen .screen-inner {
+  padding-top: 16px;
   padding-bottom: 20px;
   justify-content: flex-start;
+  min-height: auto;
+  flex: 1;
 }
 .collection-list {
   width: 100%;
@@ -980,8 +988,6 @@ input, textarea { outline: none; }
   top: 0;
   border-radius: 7px;
   cursor: pointer;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
   transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.3s, filter 0.3s;
 }
 .ring-card .card-back-face {

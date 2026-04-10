@@ -556,6 +556,7 @@
       $('#welcome-subtitle').textContent = '今日占卜次数已用完 / No more readings today';
       $('#btn-start').textContent = '查看图鉴 / View Collection';
       $('#btn-start').onclick = function () { showCollection(); };
+      setWelcomeCollBtn(false);
     }
   }
 
@@ -1098,6 +1099,11 @@
   }
 
   // ==================== Navigation ====================
+  function setWelcomeCollBtn(visible) {
+    var cb = document.querySelector('#welcome-screen .btn-collection');
+    if (cb) cb.style.display = visible ? '' : 'none';
+  }
+
   function continueDivination() {
     if (getAvailableDraws() > 0) {
       showQuestion();
@@ -1106,6 +1112,7 @@
       $('#welcome-subtitle').textContent = '今日占卜次数已用完 / No more readings today';
       $('#btn-start').textContent = '查看图鉴 / View Collection';
       $('#btn-start').onclick = function () { showCollection(); };
+      setWelcomeCollBtn(false);
     }
   }
 
@@ -1113,11 +1120,15 @@
     show('#welcome-screen');
     $('#welcome-title').textContent = 'Tarot';
     $('#welcome-subtitle').textContent = '感谢今日的占卜 / Thank you for today\'s reading';
-    $('#btn-start').textContent = getAvailableDraws() > 0 ? '继续占卜 / Continue' : '查看图鉴 / Collection';
-    $('#btn-start').onclick = function () {
-      if (getAvailableDraws() > 0) showQuestion();
-      else showCollection();
-    };
+    if (getAvailableDraws() > 0) {
+      $('#btn-start').textContent = '继续占卜 / Continue';
+      $('#btn-start').onclick = function () { showQuestion(); };
+      setWelcomeCollBtn(true);
+    } else {
+      $('#btn-start').textContent = '查看图鉴 / View Collection';
+      $('#btn-start').onclick = function () { showCollection(); };
+      setWelcomeCollBtn(false);
+    }
   }
 
   // ==================== Utility ====================
