@@ -6,7 +6,7 @@
   const DAILY_FREE = 1;
   const DAILY_MAX = 8;
   const CARDS_PER_DRAW = 3;
-  const POOL_DISPLAY = 22;
+  const POOL_DISPLAY = 78;
   const POSITIONS = [
     { key: 'past', cn: '过去', en: 'Past' },
     { key: 'present', cn: '现在', en: 'Present' },
@@ -227,6 +227,28 @@
 
     return { cn: cn, en: en, category: cat, tone: tone };
   }
+
+  // ==================== User Profile ====================
+  const PROFILE_KEY = 'tarot_user_profile';
+  var SHICHEN = [
+    { value:'zi',   cn:'子时 (23:00-01:00)', en:'Zi (23-01)' },
+    { value:'chou', cn:'丑时 (01:00-03:00)', en:'Chou (01-03)' },
+    { value:'yin',  cn:'寅时 (03:00-05:00)', en:'Yin (03-05)' },
+    { value:'mao',  cn:'卯时 (05:00-07:00)', en:'Mao (05-07)' },
+    { value:'chen', cn:'辰时 (07:00-09:00)', en:'Chen (07-09)' },
+    { value:'si',   cn:'巳时 (09:00-11:00)', en:'Si (09-11)' },
+    { value:'wu',   cn:'午时 (11:00-13:00)', en:'Wu (11-13)' },
+    { value:'wei',  cn:'未时 (13:00-15:00)', en:'Wei (13-15)' },
+    { value:'shen', cn:'申时 (15:00-17:00)', en:'Shen (15-17)' },
+    { value:'you',  cn:'酉时 (17:00-19:00)', en:'You (17-19)' },
+    { value:'xu',   cn:'戌时 (19:00-21:00)', en:'Xu (19-21)' },
+    { value:'hai',  cn:'亥时 (21:00-23:00)', en:'Hai (21-23)' }
+  ];
+
+  function loadProfile() {
+    try { return JSON.parse(localStorage.getItem(PROFILE_KEY)) || null; } catch(e) { return null; }
+  }
+  function saveProfile(p) { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); }
 
   // ==================== State ====================
   let state = {
@@ -452,12 +474,80 @@
     return map[num] || String(num);
   }
 
+  // ==================== Profile Screen ====================
+  function populateProfileDropdowns() {
+    var yearSel = $('#profile-year');
+    var monthSel = $('#profile-month');
+    var daySel = $('#profile-day');
+    var hourSel = $('#profile-hour');
+
+    // Years: 1940 to current year
+    var curYear = new Date().getFullYear();
+    for (var y = curYear; y >= 1940; y--) {
+      var opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y;
+      yearSel.appendChild(opt);
+    }
+    // Months: 1-12
+    for (var m = 1; m <= 12; m++) {
+      var opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m + '月 / ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1];
+      monthSel.appendChild(opt);
+    }
+    // Days: 1-31
+    for (var d = 1; d <= 31; d++) {
+      var opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = d;
+      daySel.appendChild(opt);
+    }
+    // Shichen
+    SHICHEN.forEach(function (s) {
+      var opt = document.createElement('option');
+      opt.value = s.value;
+      opt.textContent = s.cn + ' / ' + s.en;
+      hourSel.appendChild(opt);
+    });
+
+    // Pre-fill if profile exists
+    var existing = loadProfile();
+    if (existing) {
+      if (existing.year) yearSel.value = existing.year;
+      if (existing.month) monthSel.value = existing.month;
+      if (existing.day) daySel.value = existing.day;
+      if (existing.hour) hourSel.value = existing.hour;
+    }
+  }
+
+  function showProfile() {
+    show('#profile-screen');
+  }
+
+  function handleProfileSave() {
+    var year = $('#profile-year').value;
+    var month = $('#profile-month').value;
+    var day = $('#profile-day').value;
+    var hour = $('#profile-hour').value;
+    saveProfile({ year: year, month: month, day: day, hour: hour });
+    showQuestion();
+  }
+
   // ==================== Screen: Welcome ====================
   function initWelcome() {
     var isFirstVisitToday = state.usedCount === 0;
     if (isFirstVisitToday) {
       show('#welcome-screen');
-      $('#btn-start').onclick = function () { showQuestion(); };
+      $('#btn-start').onclick = function () {
+        // Show profile screen if no profile saved yet
+        var profile = loadProfile();
+        if (!profile) {
+          showProfile();
+        } else {
+          showQuestion();
+        }
+      };
     } else if (getAvailableDraws() > 0) {
       show('#question-screen');
       updateCountDisplay();
@@ -578,8 +668,30 @@
     processCollection(chosen);
 
     show('#reveal-screen');
+    spawnMysticalParticles();
     renderRevealCards(chosen);
     renderReading(chosen);
+  }
+
+  function spawnMysticalParticles() {
+    var screen = document.getElementById('reveal-screen');
+    // Remove old particles
+    var old = screen.querySelectorAll('.mystical-particle');
+    old.forEach(function (p) { p.parentNode.removeChild(p); });
+    // Create new floating particles
+    var colors = ['rgba(168,85,247,0.6)', 'rgba(251,191,36,0.5)', 'rgba(196,181,253,0.4)', 'rgba(125,211,252,0.4)'];
+    for (var i = 0; i < 18; i++) {
+      var p = document.createElement('div');
+      p.className = 'mystical-particle';
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.top = (30 + Math.random() * 60) + '%';
+      p.style.background = colors[i % colors.length];
+      p.style.animationDelay = (Math.random() * 5) + 's';
+      p.style.animationDuration = (4 + Math.random() * 4) + 's';
+      p.style.width = (2 + Math.random() * 3) + 'px';
+      p.style.height = p.style.width;
+      screen.appendChild(p);
+    }
   }
 
   function renderRevealCards(cards) {
@@ -601,15 +713,21 @@
       inner.appendChild(frontFace);
       flipEl.appendChild(inner);
 
+      // Mark reversed cards visually
+      if (orientation === 'reversed') {
+        flipEl.classList.add('card-reversed');
+      }
+
       // Click to show detail
       flipEl.addEventListener('click', function () {
         showCardDetail(card, orientation);
       });
 
-      // Position label
+      // Position label (outside the flipped area so it stays upright)
       var posLabel = createEl('div', 'position-label',
         '<span class="pos-cn">' + POSITIONS[i].cn + '</span>' +
-        '<span class="pos-en">' + POSITIONS[i].en + '</span>');
+        '<span class="pos-en">' + POSITIONS[i].en + '</span>' +
+        (orientation === 'reversed' ? '<span class="pos-orientation reversed-text">逆位 Reversed</span>' : '<span class="pos-orientation upright-text">正位 Upright</span>'));
       flipEl.appendChild(posLabel);
 
       row.appendChild(flipEl);
@@ -744,41 +862,72 @@
   }
 
   function renderCollection() {
-    var grid = $('#collection-grid');
-    grid.innerHTML = '';
+    var container = $('#collection-grid');
+    container.innerHTML = '';
 
-    var stats = { total: TAROT_CARDS.length, owned: 0 };
-    var rarityStats = { SSR: { total: 0, owned: 0 }, SR: { total: 0, owned: 0 }, R: { total: 0, owned: 0 }, N: { total: 0, owned: 0 } };
+    var groups = [
+      { suit:'major', label:{cn:'大阿尔卡纳',en:'Major Arcana'}, color:'#a855f7' },
+      { suit:'cups',  label:{cn:'圣杯',en:'Cups'},  color:'#60a5fa' },
+      { suit:'wands', label:{cn:'权杖',en:'Wands'}, color:'#f97316' },
+      { suit:'swords',label:{cn:'宝剑',en:'Swords'},color:'#eab308' },
+      { suit:'pentacles',label:{cn:'星币',en:'Pentacles'},color:'#4ade80' }
+    ];
+    var totalOwned = 0;
 
-    TAROT_CARDS.forEach(function (card) {
-      var owned = state.collection[card.id] || 0;
-      var rarity = card.rarity || 'N';
-      rarityStats[rarity].total++;
-      if (owned > 0) {
-        stats.owned++;
-        rarityStats[rarity].owned++;
-      }
+    groups.forEach(function (g) {
+      var cards = TAROT_CARDS.filter(function(c){ return c.suit === g.suit; });
+      var owned = cards.filter(function(c){ return (state.collection[c.id]||0)>0; }).length;
+      totalOwned += owned;
 
-      var el = createEl('div', 'collection-card ' + (owned > 0 ? 'owned rarity-' + rarity.toLowerCase() : 'unowned'));
-      el.innerHTML =
-        '<div class="collection-card-inner">' +
-          (owned > 0 ? renderMiniCardFront(card) : '<div class="card-unknown">?</div>') +
+      var groupEl = createEl('div', 'coll-group');
+      var header = createEl('div', 'coll-group-header');
+      header.style.borderLeftColor = g.color;
+      header.innerHTML =
+        '<div class="coll-group-info">' +
+          '<span class="coll-group-name" style="color:'+g.color+'">' + g.label.cn + ' / ' + g.label.en + '</span>' +
+          '<span class="coll-group-progress">' + owned + ' / ' + cards.length + '</span>' +
         '</div>' +
-        (owned > 0 ? '<div class="collection-count">' + owned + '</div>' : '');
+        '<div class="coll-group-bar"><div class="coll-group-fill" style="width:' + (cards.length?owned/cards.length*100:0) + '%;background:' + g.color + '"></div></div>' +
+        '<svg class="coll-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
 
-      if (owned > 0) {
-        el.addEventListener('click', function () { showCardDetail(card, 'upright'); });
-      }
-      grid.appendChild(el);
+      var grid = createEl('div', 'coll-group-grid hidden');
+      cards.forEach(function (card) {
+        var count = state.collection[card.id] || 0;
+        var rarity = card.rarity || 'N';
+        var el = createEl('div', 'collection-card ' + (count > 0 ? 'owned rarity-' + rarity.toLowerCase() : 'unowned'));
+        el.innerHTML =
+          '<div class="collection-card-inner">' +
+            (count > 0 ? renderMiniCardFront(card) : '<div class="card-unknown">?</div>') +
+          '</div>' +
+          (count > 0 ? '<div class="collection-count">' + count + '</div>' : '');
+        if (count > 0) {
+          el.addEventListener('click', function () { showCardDetail(card, 'upright'); });
+        }
+        grid.appendChild(el);
+      });
+
+      header.addEventListener('click', function () {
+        grid.classList.toggle('hidden');
+        groupEl.classList.toggle('expanded');
+      });
+
+      groupEl.appendChild(header);
+      groupEl.appendChild(grid);
+      container.appendChild(groupEl);
     });
 
+    var rarityStats = { SSR:{t:0,o:0}, SR:{t:0,o:0}, R:{t:0,o:0}, N:{t:0,o:0} };
+    TAROT_CARDS.forEach(function(c){
+      var r=c.rarity||'N'; rarityStats[r].t++;
+      if((state.collection[c.id]||0)>0) rarityStats[r].o++;
+    });
     $('#collection-stats').innerHTML =
-      '<div class="stats-total">' + stats.owned + ' / ' + stats.total + '</div>' +
+      '<div class="stats-total">' + totalOwned + ' / ' + TAROT_CARDS.length + '</div>' +
       '<div class="stats-detail">' +
-        'SSR: ' + rarityStats.SSR.owned + '/' + rarityStats.SSR.total + '  ' +
-        'SR: ' + rarityStats.SR.owned + '/' + rarityStats.SR.total + '  ' +
-        'R: ' + rarityStats.R.owned + '/' + rarityStats.R.total + '  ' +
-        'N: ' + rarityStats.N.owned + '/' + rarityStats.N.total +
+        'SSR: ' + rarityStats.SSR.o + '/' + rarityStats.SSR.t + '  ' +
+        'SR: ' + rarityStats.SR.o + '/' + rarityStats.SR.t + '  ' +
+        'R: ' + rarityStats.R.o + '/' + rarityStats.R.t + '  ' +
+        'N: ' + rarityStats.N.o + '/' + rarityStats.N.t +
       '</div>';
   }
 
@@ -860,6 +1009,12 @@
         show('#welcome-screen');
       }
     });
+
+    // Profile screen
+    populateProfileDropdowns();
+    $('#btn-profile-save').addEventListener('click', handleProfileSave);
+    $('#btn-profile-skip').addEventListener('click', function () { showQuestion(); });
+    $('#btn-profile-back').addEventListener('click', function () { show('#welcome-screen'); });
 
     // Init welcome
     initWelcome();

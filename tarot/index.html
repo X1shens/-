@@ -26,6 +26,57 @@
       </div>
     </div>
 
+    <!-- ========== Profile Screen ========== -->
+    <div id="profile-screen" class="screen">
+      <div class="screen-inner">
+        <div class="screen-header">
+          <button id="btn-profile-back" class="btn-icon" aria-label="Back">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <span class="section-title" style="margin-bottom:0">个人信息 / Profile</span>
+          <button id="btn-profile-skip" class="btn-icon" style="font-size:12px;color:#64748b;width:auto;padding:0 8px;">
+            跳过 Skip
+          </button>
+        </div>
+        <div class="profile-container">
+          <div class="profile-form">
+            <div class="profile-field">
+              <label class="profile-label">出生年份 / Birth Year</label>
+              <select id="profile-year" class="profile-select">
+                <option value="">-- 选择年份 / Select Year --</option>
+              </select>
+            </div>
+            <div class="profile-row">
+              <div class="profile-field">
+                <label class="profile-label">月份 / Month</label>
+                <select id="profile-month" class="profile-select">
+                  <option value="">-- 月 / Month --</option>
+                </select>
+              </div>
+              <div class="profile-field">
+                <label class="profile-label">日期 / Day</label>
+                <select id="profile-day" class="profile-select">
+                  <option value="">-- 日 / Day --</option>
+                </select>
+              </div>
+            </div>
+            <div class="profile-field">
+              <label class="profile-label">出生时辰 / Birth Hour</label>
+              <select id="profile-hour" class="profile-select">
+                <option value="">-- 选择时辰 / Select Hour --</option>
+              </select>
+            </div>
+            <p class="profile-hint">生辰信息将用于增强占卜的个性化体验<br/>Birth info enhances your personalized reading</p>
+            <button id="btn-profile-save" class="btn btn-primary btn-glow" style="margin-top:8px;">
+              保存并继续 / Save & Continue
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ========== Question Screen ========== -->
     <div id="question-screen" class="screen">
       <div class="screen-inner">
