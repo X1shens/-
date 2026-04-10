@@ -859,33 +859,82 @@ input, textarea { outline: none; }
   transform: rotateY(180deg) rotate(180deg);
 }
 
-/* ---- Collection Sets ---- */
-#collection-screen .screen-inner {
+/* ---- Collection Book List ---- */
+.collection-inner {
   padding-top: 10px;
   padding-bottom: 20px;
   justify-content: flex-start;
 }
-.coll-set-header {
+.collection-list {
   width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-  margin-bottom: 10px;
-  border-bottom: 1px solid rgba(168,85,247,0.2);
+  flex-direction: column;
+  gap: 12px;
 }
-.coll-set-name {
+.coll-book {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(168,85,247,0.2);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.coll-book:hover:not(.locked) {
+  background: rgba(168,85,247,0.06);
+  transform: translateX(4px);
+  box-shadow: 0 4px 20px rgba(168,85,247,0.1);
+}
+.coll-book-icon {
+  width: 48px;
+  height: 64px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #1a0940, #2d1060);
+  border: 1.5px solid rgba(168,85,247,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.coll-book-icon svg { color: #a855f7; }
+.coll-book-info { flex: 1; }
+.coll-book-name {
   font-family: Georgia, serif;
   font-size: 15px;
-  color: #a855f7;
-  letter-spacing: 0.04em;
-  font-weight: 600;
+  color: #fbbf24;
+  margin-bottom: 4px;
 }
-.coll-set-progress {
+.coll-book-progress {
   font-size: 12px;
   color: #64748b;
 }
-.coll-set-grid {
+.coll-book-bar {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.coll-book-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: #a855f7;
+  transition: width 0.5s ease;
+}
+.coll-book-arrow {
+  color: #64748b;
+  flex-shrink: 0;
+}
+.coll-book.locked {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ---- Collection Detail ---- */
+.detail-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
   gap: 8px;
@@ -904,8 +953,8 @@ input, textarea { outline: none; }
   width: 100%;
   flex: 1;
   min-height: 280px;
-  perspective: 1200px;
-  perspective-origin: 50% 50%;
+  perspective: 700px;
+  perspective-origin: 50% 45%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -933,7 +982,7 @@ input, textarea { outline: none; }
   cursor: pointer;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  transition: box-shadow 0.2s, filter 0.2s;
+  transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.3s, filter 0.3s;
 }
 .ring-card .card-back-face {
   border-radius: 7px;

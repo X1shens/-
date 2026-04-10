@@ -585,7 +585,7 @@
   var ringLastTime = 0;
   var ringDragMoved = false;
   var ringAnimFrame = null;
-  var RING_RADIUS = 400;
+  var RING_RADIUS = 350;
   var ANGLE_PER_CARD = 360 / POOL_DISPLAY;
 
   // ==================== Screen: Card Pool ====================
@@ -644,7 +644,7 @@
 
   function updateRingTransform() {
     var track = $('#ring-track');
-    if (track) track.style.transform = 'rotateY(' + ringAngle + 'deg)';
+    if (track) track.style.transform = 'rotateX(-12deg) rotateY(' + ringAngle + 'deg)';
   }
 
   // ---- Ring Drag / Swipe ----
@@ -726,10 +726,15 @@
 
   // ---- Card Selection & Confirmation ----
   function selectCard(idx) {
+    var baseAngle = idx * ANGLE_PER_CARD;
     if (state.selectedCards.indexOf(idx) !== -1) {
+      // Deselect - slide card back into ring
       state.selectedCards = state.selectedCards.filter(function (i) { return i !== idx; });
       var el = $('.ring-card[data-index="' + idx + '"]');
-      if (el) el.classList.remove('selected');
+      if (el) {
+        el.classList.remove('selected');
+        el.style.transform = 'rotateY(' + baseAngle + 'deg) translateZ(' + RING_RADIUS + 'px)';
+      }
       updateSelectionCount();
       return;
     }
@@ -737,7 +742,11 @@
 
     state.selectedCards.push(idx);
     var el = $('.ring-card[data-index="' + idx + '"]');
-    if (el) el.classList.add('selected');
+    if (el) {
+      el.classList.add('selected');
+      // Pull card out of ring: push forward + float up
+      el.style.transform = 'rotateY(' + baseAngle + 'deg) translateZ(' + (RING_RADIUS + 80) + 'px) translateY(-35px) scale(1.12)';
+    }
     updateSelectionCount();
 
     if (state.selectedCards.length === CARDS_PER_DRAW) {
@@ -773,7 +782,11 @@
     $('#confirm-overlay').classList.remove('active');
     state.selectedCards.forEach(function (idx) {
       var el = $('.ring-card[data-index="' + idx + '"]');
-      if (el) el.classList.remove('selected');
+      if (el) {
+        el.classList.remove('selected');
+        var baseAngle = idx * ANGLE_PER_CARD;
+        el.style.transform = 'rotateY(' + baseAngle + 'deg) translateZ(' + RING_RADIUS + 'px)';
+      }
     });
     state.selectedCards = [];
     updateSelectionCount();
@@ -987,23 +1000,70 @@
     renderCollection();
   }
 
+  // Collection sets definition (extensible for future card pool iterations)
+  var COLLECTION_SETS = [
+    { id: 'classic', name: { cn: '标准册', en: 'Classic Tarot' }, cards: TAROT_CARDS, locked: false },
+    { id: 'expansion1', name: { cn: '迭代册 I', en: 'Expansion I' }, cards: null, locked: true },
+    { id: 'expansion2', name: { cn: '迭代册 II', en: 'Expansion II' }, cards: null, locked: true }
+  ];
+
   function renderCollection() {
-    var container = $('#collection-grid');
+    var container = $('#collection-list');
     container.innerHTML = '';
 
-    var totalOwned = 0;
-    TAROT_CARDS.forEach(function (c) {
-      if ((state.collection[c.id] || 0) > 0) totalOwned++;
+    COLLECTION_SETS.forEach(function (set) {
+      var total = set.cards ? set.cards.length : 0;
+      var owned = 0;
+      if (set.cards) {
+        set.cards.forEach(function (c) {
+          if ((state.collection[c.id] || 0) > 0) owned++;
+        });
+      }
+
+      var el = createEl('div', 'coll-book' + (set.locked ? ' locked' : ''));
+      el.innerHTML =
+        '<div class="coll-book-icon">' +
+          '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+            '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>' +
+            '<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>' +
+          '</svg>' +
+        '</div>' +
+        '<div class="coll-book-info">' +
+          '<div class="coll-book-name">' + set.name.cn + ' / ' + set.name.en + '</div>' +
+          '<div class="coll-book-progress">' +
+            (set.locked ? '即将推出 / Coming Soon' : owned + ' / ' + total) +
+          '</div>' +
+          (set.locked ? '' : '<div class="coll-book-bar"><div class="coll-book-fill" style="width:' + (total ? owned / total * 100 : 0) + '%"></div></div>') +
+        '</div>' +
+        '<div class="coll-book-arrow">' +
+          '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>' +
+        '</div>';
+
+      if (!set.locked) {
+        el.addEventListener('click', function () { showCollectionDetail(set); });
+      }
+      container.appendChild(el);
+    });
+  }
+
+  function showCollectionDetail(set) {
+    show('#collection-detail-screen');
+
+    var owned = 0;
+    set.cards.forEach(function (c) {
+      if ((state.collection[c.id] || 0) > 0) owned++;
     });
 
-    var rarityStats = { SSR:{t:0,o:0}, SR:{t:0,o:0}, R:{t:0,o:0}, N:{t:0,o:0} };
-    TAROT_CARDS.forEach(function (c) {
+    $('#detail-title').textContent = set.name.cn + ' / ' + set.name.en;
+
+    var rarityStats = { SSR: { t: 0, o: 0 }, SR: { t: 0, o: 0 }, R: { t: 0, o: 0 }, N: { t: 0, o: 0 } };
+    set.cards.forEach(function (c) {
       var r = c.rarity || 'N'; rarityStats[r].t++;
       if ((state.collection[c.id] || 0) > 0) rarityStats[r].o++;
     });
 
-    $('#collection-stats').innerHTML =
-      '<div class="stats-total">' + totalOwned + ' / ' + TAROT_CARDS.length + '</div>' +
+    $('#detail-stats').innerHTML =
+      '<div class="stats-total">' + owned + ' / ' + set.cards.length + '</div>' +
       '<div class="stats-detail">' +
         'SSR: ' + rarityStats.SSR.o + '/' + rarityStats.SSR.t + '  ' +
         'SR: ' + rarityStats.SR.o + '/' + rarityStats.SR.t + '  ' +
@@ -1011,15 +1071,9 @@
         'N: ' + rarityStats.N.o + '/' + rarityStats.N.t +
       '</div>';
 
-    // Single set header (extensible for future card pool sets)
-    var setHeader = createEl('div', 'coll-set-header',
-      '<span class="coll-set-name">经典塔罗 / Classic Tarot</span>' +
-      '<span class="coll-set-progress">' + totalOwned + ' / ' + TAROT_CARDS.length + '</span>');
-    container.appendChild(setHeader);
-
-    // All 78 cards in one flat grid
-    var grid = createEl('div', 'coll-set-grid');
-    TAROT_CARDS.forEach(function (card) {
+    var grid = $('#detail-grid');
+    grid.innerHTML = '';
+    set.cards.forEach(function (card) {
       var count = state.collection[card.id] || 0;
       var rarity = card.rarity || 'N';
       var el = createEl('div', 'collection-card ' + (count > 0 ? 'owned rarity-' + rarity.toLowerCase() : 'unowned'));
@@ -1033,7 +1087,6 @@
       }
       grid.appendChild(el);
     });
-    container.appendChild(grid);
   }
 
   function renderMiniCardFront(card) {
@@ -1121,6 +1174,9 @@
         }
       };
     });
+
+    // Detail back -> collection list
+    $('#btn-detail-back').addEventListener('click', function () { showCollection(); });
 
     // Ring carousel interaction
     initRingInteraction();
