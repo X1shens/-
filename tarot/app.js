@@ -393,12 +393,18 @@
     var rarity = card.rarity || 'N';
     var rarityClass = 'rarity-' + rarity.toLowerCase();
 
-    var symbolHtml = '';
+    // If card has a real image, use image-based layout
     if (card.visual.image) {
-      symbolHtml = '<img src="' + card.visual.image + '" alt="' + card.name.en + '" class="card-custom-img"/>';
-    } else {
-      symbolHtml = renderSVGSymbol(card);
+      var html = '<div class="card-front-face card-has-image ' + rarityClass + '">' +
+        '<img src="' + card.visual.image + '" alt="' + card.name.en + '" class="card-custom-img' + (isReversed ? ' reversed-art' : '') + '"/>' +
+        '<div class="card-rarity-badge rarity-bg-' + rarity.toLowerCase() + '">' + rarity + '</div>' +
+        (isReversed ? '<div class="reversed-badge">Reversed / 逆位</div>' : '') +
+        '</div>';
+      return html;
     }
+
+    // Fallback: SVG symbol layout
+    var symbolHtml = renderSVGSymbol(card);
 
     var numberDisplay = card.suit === 'major'
       ? toRoman(card.number)
@@ -1129,6 +1135,11 @@
   }
 
   function renderMiniCardFront(card) {
+    if (card.visual.image) {
+      return '<div class="mini-card mini-card-image">' +
+        '<img src="' + card.visual.image + '" alt="' + card.name.en + '" class="mini-card-img"/>' +
+        '</div>';
+    }
     var palette = card.visual.palette;
     return '<div class="mini-card" style="background:' + palette.bg + ';border-color:' + palette.primary + ';color:' + palette.primary + ';">' +
       '<span class="mini-name">' + card.name.cn + '</span>' +
