@@ -97,9 +97,9 @@ input, textarea { outline: none; }
 }
 .welcome-title {
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(36px, 12vw, 72px);
+  font-size: clamp(28px, 8vw, 56px);
   font-weight: 400;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   color: #c9a24e;
   text-shadow: 0 0 40px rgba(201,162,78,0.5), 0 0 80px rgba(201,162,78,0.2);
   animation: float 4s ease-in-out infinite;
@@ -1098,22 +1098,24 @@ input, textarea { outline: none; }
   border-radius: 6px;
   cursor: pointer;
   transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.3s, filter 0.3s;
+  box-shadow: -3px 0 6px rgba(0,0,0,0.7), 3px 0 6px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.5);
 }
 .ring-card .card-back-face {
   border-radius: 6px;
   border-width: 1.5px;
+  box-shadow: inset 0 0 8px rgba(201,162,78,0.08);
 }
-.ring-card .card-back-face::before { inset: 3px; border-width: 1px; }
-.ring-card .card-back-face::after { inset: 5px; }
-.ring-card .card-back-pattern::before { top: 6px; left: 6px; font-size: 6px; }
-.ring-card .card-back-pattern::after { bottom: 6px; right: 6px; font-size: 6px; }
+.ring-card .card-back-face::before { inset: 2px; border-width: 1px; }
+.ring-card .card-back-face::after { inset: 4px; border-width: 0.5px; }
+.ring-card .card-back-pattern::before { top: 5px; left: 5px; font-size: 5px; }
+.ring-card .card-back-pattern::after { bottom: 5px; right: 5px; font-size: 5px; }
 .ring-card .card-back-inner {
-  width: 36%;
-  height: 36%;
+  width: 32%;
+  height: 32%;
   border-width: 1px;
 }
 .ring-card .card-back-inner::after {
-  font-size: 10px;
+  font-size: 9px;
 }
 .ring-card.selected {
   box-shadow: 0 0 24px rgba(251,191,36,0.7), 0 0 0 2px #fbbf24;
