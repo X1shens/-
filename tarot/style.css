@@ -932,17 +932,24 @@ input, textarea { outline: none; }
 }
 
 /* ---- Collection Book List ---- */
+#collection-screen,
+#collection-detail-screen {
+  position: absolute;
+  inset: 0;
+}
 #collection-screen.active,
 #collection-detail-screen.active {
+  position: relative;
   display: block;
 }
 #collection-screen .screen-inner,
 #collection-detail-screen .screen-inner {
+  display: block;
+  min-height: auto;
   padding-top: 16px;
   padding-bottom: 20px;
-  justify-content: flex-start;
-  min-height: auto;
-  align-items: stretch;
+  max-width: 560px;
+  margin: 0 auto;
 }
 .collection-list {
   width: 100%;
