@@ -1,6 +1,6 @@
 // Tarot Card Data - All visual assets configurable via card.visual.image URL
 const TAROT_CONFIG = {
-  cardBack: { image: 'image/tarotI/cards/card_back.png', pattern: 'mystical' },
+  cardBack: { image: null, pattern: 'mystical' },
   suits: {
     major:     { cn: '大阿尔卡纳', en: 'Major Arcana', color: '#a855f7' },
     cups:      { cn: '圣杯', en: 'Cups',      color: '#60a5fa', element: { cn: '水', en: 'Water' } },
