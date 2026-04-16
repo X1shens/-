@@ -593,7 +593,7 @@
   var ringDragMoved = false;
   var ringAnimFrame = null;
   var ringAutoRotate = null;
-  var RING_RADIUS = 300;
+  var RING_RADIUS = 900;
   var ANGLE_PER_CARD = 360 / POOL_DISPLAY;
 
   // ==================== Screen: Card Pool ====================
@@ -685,7 +685,7 @@
 
   function updateRingTransform() {
     var track = $('#ring-track');
-    if (track) track.style.transform = 'rotateX(-12deg) rotateY(' + ringAngle + 'deg)';
+    if (track) track.style.transform = 'rotateX(-8deg) rotateY(' + ringAngle + 'deg)';
   }
 
   // ---- Ring Drag / Swipe ----
@@ -783,8 +783,7 @@
     var deckArea = $('#deck-area');
     deckArea.innerHTML = '';
 
-    $('#shuffle-hint').innerHTML = '请点击开始洗牌<br/>Tap to Shuffle';
-    $('#btn-shuffle').style.display = '';
+    $('#shuffle-hint').innerHTML = '点击牌堆开始洗牌<br/>Tap the deck to shuffle';
 
     var cards = [];
     for (var i = 0; i < SHUFFLE_CARD_COUNT; i++) {
@@ -799,8 +798,8 @@
       cards.push(el);
     }
 
-    $('#btn-shuffle').onclick = function () {
-      this.style.display = 'none';
+    deckArea.onclick = function () {
+      deckArea.onclick = null;
       $('#shuffle-hint').innerHTML = '洗牌中... / Shuffling...';
       runShuffleAnimation(cards);
     };
@@ -849,8 +848,6 @@
 
       // Phase 3: Merge into neat pile
       setTimeout(function () {
-        $('#shuffle-hint').innerHTML = '准备就绪 / Ready';
-
         cards.forEach(function (el, i) {
           el.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
           el.style.transform = 'translateY(' + (-i * 0.6) + 'px) rotate(0deg)';
@@ -902,7 +899,7 @@
     if (el) {
       el.classList.add('selected');
       // Pull card out of ring: push forward + float up
-      el.style.transform = 'rotateY(' + baseAngle + 'deg) translateZ(' + (RING_RADIUS + 60) + 'px) translateY(-25px) scale(1.15)';
+      el.style.transform = 'rotateY(' + baseAngle + 'deg) translateZ(' + (RING_RADIUS + 120) + 'px) translateY(-20px) scale(1.1)';
     }
     updateSelectionCount();
 
