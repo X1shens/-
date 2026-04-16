@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Garden Guidelines - 塔罗占卜</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <div id="app">
@@ -198,10 +198,19 @@
 
   </div>
 
+  <!-- Error handler for debugging -->
+  <script>
+  window.onerror = function(msg, url, line) {
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ef4444;color:#fff;padding:12px 16px;z-index:99999;font-size:13px;';
+    d.textContent = 'Error: ' + msg + ' (line ' + line + ')';
+    document.body.appendChild(d);
+  };
+  </script>
   <!-- External: html2canvas for screenshot (async, optional) -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" async defer></script>
   <!-- App scripts -->
-  <script src="cards.js"></script>
-  <script src="app.js"></script>
+  <script src="cards.js?v=4"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
