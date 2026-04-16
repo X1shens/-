@@ -593,7 +593,7 @@
   var ringDragMoved = false;
   var ringAnimFrame = null;
   var ringAutoRotate = null;
-  var RING_RADIUS = 260;
+  var RING_RADIUS = 300;
   var ANGLE_PER_CARD = 360 / POOL_DISPLAY;
 
   // ==================== Screen: Card Pool ====================
@@ -613,7 +613,7 @@
     state.drawnCards = dealPool();
 
     show('#pool-screen');
-    renderPool();
+    showShuffleStage();
   }
 
   function renderPool() {
@@ -769,6 +769,118 @@
     ringVelocity = 0;
   }
 
+  // ==================== Shuffle Animation ====================
+  var SHUFFLE_CARD_COUNT = 22;
+
+  function showShuffleStage() {
+    $('#shuffle-stage').style.display = '';
+    $('#shuffle-stage').style.opacity = '1';
+    $('#pool-title').style.display = 'none';
+    $('#selected-count').style.display = 'none';
+    $('#ring-viewport').style.display = 'none';
+    $('#ring-hint').style.display = 'none';
+
+    var deckArea = $('#deck-area');
+    deckArea.innerHTML = '';
+
+    $('#shuffle-hint').innerHTML = '请点击开始洗牌<br/>Tap to Shuffle';
+    $('#btn-shuffle').style.display = '';
+
+    var cards = [];
+    for (var i = 0; i < SHUFFLE_CARD_COUNT; i++) {
+      var el = createEl('div', 'shuffle-card');
+      el.innerHTML = renderCardBack();
+      var offsetX = (Math.random() - 0.5) * 6;
+      var offsetY = -i * 1.3;
+      var rotate = (Math.random() - 0.5) * 4;
+      el.style.transform = 'translate(' + offsetX + 'px, ' + offsetY + 'px) rotate(' + rotate + 'deg)';
+      el.style.zIndex = i;
+      deckArea.appendChild(el);
+      cards.push(el);
+    }
+
+    $('#btn-shuffle').onclick = function () {
+      this.style.display = 'none';
+      $('#shuffle-hint').innerHTML = '洗牌中... / Shuffling...';
+      runShuffleAnimation(cards);
+    };
+  }
+
+  function runShuffleAnimation(cards) {
+    var count = cards.length;
+    var third = Math.floor(count / 3);
+    var g1 = cards.slice(0, third);
+    var g2 = cards.slice(third, third * 2);
+    var g3 = cards.slice(third * 2);
+
+    // Phase 1: Split to 3 piles
+    g1.forEach(function (el, i) {
+      el.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+      el.style.transform = 'translateX(-85px) translateY(' + (-i * 1.3) + 'px) rotate(' + ((Math.random() - 0.5) * 3) + 'deg)';
+    });
+    g2.forEach(function (el, i) {
+      el.style.transition = 'transform 0.3s ease';
+      el.style.transform = 'translateY(' + (-i * 1.3) + 'px) rotate(' + ((Math.random() - 0.5) * 2) + 'deg)';
+    });
+    g3.forEach(function (el, i) {
+      el.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+      el.style.transform = 'translateX(85px) translateY(' + (-i * 1.3) + 'px) rotate(' + ((Math.random() - 0.5) * 3) + 'deg)';
+    });
+
+    // Phase 2: Riffle shuffle (interleave from outer piles to center)
+    setTimeout(function () {
+      var riffleCards = [];
+      var maxLen = Math.max(g1.length, g3.length);
+      for (var i = 0; i < maxLen; i++) {
+        if (i < g1.length) riffleCards.push(g1[g1.length - 1 - i]);
+        if (i < g3.length) riffleCards.push(g3[g3.length - 1 - i]);
+      }
+
+      var baseZ = count;
+      riffleCards.forEach(function (el, idx) {
+        setTimeout(function () {
+          el.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+          el.style.zIndex = baseZ + idx;
+          el.style.transform = 'translateY(' + (-(g2.length + idx) * 1) + 'px) rotate(' + ((Math.random() - 0.5) * 2) + 'deg)';
+        }, idx * 50);
+      });
+
+      var riffleTime = riffleCards.length * 50 + 350;
+
+      // Phase 3: Merge into neat pile
+      setTimeout(function () {
+        $('#shuffle-hint').innerHTML = '准备就绪 / Ready';
+
+        cards.forEach(function (el, i) {
+          el.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+          el.style.transform = 'translateY(' + (-i * 0.6) + 'px) rotate(0deg)';
+          el.style.zIndex = i;
+        });
+
+        // Phase 4: Transition to ring
+        setTimeout(function () {
+          transitionToRing();
+        }, 600);
+      }, riffleTime);
+    }, 650);
+  }
+
+  function transitionToRing() {
+    var stage = $('#shuffle-stage');
+    stage.style.opacity = '0';
+
+    setTimeout(function () {
+      stage.style.display = 'none';
+
+      $('#pool-title').style.display = '';
+      $('#selected-count').style.display = '';
+      $('#ring-viewport').style.display = '';
+      $('#ring-hint').style.display = '';
+
+      renderPool();
+    }, 350);
+  }
+
   // ---- Card Selection & Confirmation ----
   function selectCard(idx) {
     var baseAngle = idx * ANGLE_PER_CARD;
@@ -790,7 +902,7 @@
     if (el) {
       el.classList.add('selected');
       // Pull card out of ring: push forward + float up
-      el.style.transform = 'rotateY(' + baseAngle + 'deg) translateZ(' + (RING_RADIUS + 80) + 'px) translateY(-35px) scale(1.12)';
+      el.style.transform = 'rotateY(' + baseAngle + 'deg) translateZ(' + (RING_RADIUS + 60) + 'px) translateY(-25px) scale(1.15)';
     }
     updateSelectionCount();
 
@@ -1167,7 +1279,7 @@
 
   function exitApp() {
     show('#welcome-screen');
-    $('#welcome-title').textContent = 'Tarot';
+    $('#welcome-title').textContent = 'Garden Guidelines';
     $('#welcome-subtitle').textContent = '感谢今日的占卜 / Thank you for today\'s reading';
     if (getAvailableDraws() > 0) {
       $('#btn-start').textContent = '继续占卜 / Continue';

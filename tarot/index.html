@@ -107,12 +107,17 @@
     <!-- ========== Card Pool Screen ========== -->
     <div id="pool-screen" class="screen">
       <div class="screen-inner pool-inner">
-        <h2 class="section-title pool-title">选择三张卡牌 / Choose 3 Cards</h2>
+        <div id="shuffle-stage" class="shuffle-stage">
+          <div id="deck-area" class="deck-area"></div>
+          <p id="shuffle-hint" class="shuffle-hint">请点击开始洗牌<br/>Tap to Shuffle</p>
+          <button id="btn-shuffle" class="btn btn-primary btn-glow">开始洗牌 / Start Shuffle</button>
+        </div>
+        <h2 id="pool-title" class="section-title pool-title">选择三张卡牌 / Choose 3 Cards</h2>
         <div id="selected-count" class="selected-count"></div>
         <div class="ring-viewport" id="ring-viewport">
           <div class="ring-track" id="ring-track"></div>
         </div>
-        <p class="ring-hint">左右滑动选牌 / Swipe to browse</p>
+        <p id="ring-hint" class="ring-hint">左右滑动选牌 / Swipe to browse</p>
       </div>
       <div id="confirm-overlay" class="confirm-overlay">
         <div class="confirm-box">
