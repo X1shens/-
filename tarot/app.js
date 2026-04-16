@@ -613,7 +613,12 @@
     state.drawnCards = dealPool();
 
     show('#pool-screen');
-    showShuffleStage();
+    try {
+      showShuffleStage();
+    } catch (e) {
+      // Fallback: skip shuffle animation, go directly to ring
+      renderPool();
+    }
   }
 
   function renderPool() {
@@ -772,18 +777,58 @@
   // ==================== Shuffle Animation ====================
   var SHUFFLE_CARD_COUNT = 22;
 
-  function showShuffleStage() {
-    $('#shuffle-stage').style.display = '';
-    $('#shuffle-stage').style.opacity = '1';
-    $('#pool-title').style.display = 'none';
-    $('#selected-count').style.display = 'none';
-    $('#ring-viewport').style.display = 'none';
-    $('#ring-hint').style.display = 'none';
+  // Ensure shuffle-related DOM elements exist (handles HTML caching)
+  function ensureShuffleDOM() {
+    // Assign IDs to existing elements that might lack them in cached HTML
+    if (!$('#pool-title')) {
+      var h2 = document.querySelector('#pool-screen .pool-title');
+      if (h2) h2.id = 'pool-title';
+    }
+    if (!$('#ring-hint')) {
+      var hint = document.querySelector('#pool-screen .ring-hint');
+      if (hint) hint.id = 'ring-hint';
+    }
+    // Create shuffle-stage if it doesn't exist in the DOM
+    if (!$('#shuffle-stage')) {
+      var poolInner = document.querySelector('#pool-screen .pool-inner');
+      if (poolInner) {
+        var stage = document.createElement('div');
+        stage.id = 'shuffle-stage';
+        stage.className = 'shuffle-stage';
+        stage.innerHTML = '<div id="deck-area" class="deck-area"></div>' +
+          '<p id="shuffle-hint" class="shuffle-hint"></p>';
+        poolInner.insertBefore(stage, poolInner.firstChild);
+      }
+    }
+  }
 
+  function showShuffleStage() {
+    ensureShuffleDOM();
+
+    var shuffleStage = $('#shuffle-stage');
+    var poolTitle = $('#pool-title');
+    var selectedCount = $('#selected-count');
+    var ringViewport = $('#ring-viewport');
+    var ringHint = $('#ring-hint');
     var deckArea = $('#deck-area');
+    var shuffleHint = $('#shuffle-hint');
+
+    // If critical elements still missing, skip animation and go straight to ring
+    if (!shuffleStage || !deckArea) {
+      renderPool();
+      return;
+    }
+
+    shuffleStage.style.display = '';
+    shuffleStage.style.opacity = '1';
+    if (poolTitle) poolTitle.style.display = 'none';
+    if (selectedCount) selectedCount.style.display = 'none';
+    if (ringViewport) ringViewport.style.display = 'none';
+    if (ringHint) ringHint.style.display = 'none';
+
     deckArea.innerHTML = '';
 
-    $('#shuffle-hint').innerHTML = '点击牌堆开始洗牌<br/>Tap the deck to shuffle';
+    if (shuffleHint) shuffleHint.innerHTML = '点击牌堆开始洗牌<br/>Tap the deck to shuffle';
 
     var cards = [];
     for (var i = 0; i < SHUFFLE_CARD_COUNT; i++) {
@@ -800,7 +845,8 @@
 
     deckArea.onclick = function () {
       deckArea.onclick = null;
-      $('#shuffle-hint').innerHTML = '洗牌中... / Shuffling...';
+      var hint = $('#shuffle-hint');
+      if (hint) hint.innerHTML = '洗牌中... / Shuffling...';
       runShuffleAnimation(cards);
     };
   }
@@ -864,15 +910,21 @@
 
   function transitionToRing() {
     var stage = $('#shuffle-stage');
-    stage.style.opacity = '0';
+    if (stage) {
+      stage.style.opacity = '0';
+    }
 
     setTimeout(function () {
-      stage.style.display = 'none';
+      if (stage) stage.style.display = 'none';
 
-      $('#pool-title').style.display = '';
-      $('#selected-count').style.display = '';
-      $('#ring-viewport').style.display = '';
-      $('#ring-hint').style.display = '';
+      var poolTitle = $('#pool-title');
+      var selectedCount = $('#selected-count');
+      var ringViewport = $('#ring-viewport');
+      var ringHint = $('#ring-hint');
+      if (poolTitle) poolTitle.style.display = '';
+      if (selectedCount) selectedCount.style.display = '';
+      if (ringViewport) ringViewport.style.display = '';
+      if (ringHint) ringHint.style.display = '';
 
       renderPool();
     }, 350);
