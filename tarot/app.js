@@ -570,8 +570,11 @@
   function showQuestion() {
     show('#question-screen');
     updateCountDisplay();
-    $('#question-input').value = '';
-    $('#question-input').focus();
+    var input = $('#question-input');
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
   }
 
   function updateCountDisplay() {
@@ -598,10 +601,13 @@
 
   // ==================== Screen: Card Pool ====================
   function showPool() {
-    var question = $('#question-input').value.trim();
+    var inputEl = $('#question-input');
+    var question = inputEl ? inputEl.value.trim() : '';
     if (!question) {
-      $('#question-input').classList.add('shake');
-      setTimeout(function () { $('#question-input').classList.remove('shake'); }, 500);
+      if (inputEl) {
+        inputEl.classList.add('shake');
+        setTimeout(function () { inputEl.classList.remove('shake'); }, 500);
+      }
       return;
     }
     if (getAvailableDraws() <= 0) {
