@@ -570,28 +570,37 @@
   function showQuestion() {
     show('#question-screen');
     updateCountDisplay();
+
+    var container = document.querySelector('#question-screen .question-container');
+
+    // Remove stray text nodes (broken textarea tags rendered as text by some servers)
+    if (container) {
+      var nodes = container.childNodes;
+      for (var i = nodes.length - 1; i >= 0; i--) {
+        if (nodes[i].nodeType === 3 && nodes[i].textContent.trim()) {
+          container.removeChild(nodes[i]);
+        }
+      }
+    }
+
     var input = $('#question-input');
 
     // If the textarea is missing from DOM, recreate it
-    if (!input) {
-      var container = document.querySelector('#question-screen .question-container');
-      if (container) {
-        input = document.createElement('textarea');
-        input.id = 'question-input';
-        input.className = 'question-input';
-        input.placeholder = '请输入你想占卜的问题...\nEnter your question...';
-        input.rows = 4;
-        input.maxLength = 200;
-        var submitBtn = $('#btn-submit-question');
-        if (submitBtn && submitBtn.parentNode === container) {
-          container.insertBefore(input, submitBtn);
-        } else {
-          container.appendChild(input);
-        }
-        // Re-bind the submit button after textarea recreation
-        if (submitBtn) {
-          submitBtn.onclick = function () { showPool(); };
-        }
+    if (!input && container) {
+      input = document.createElement('textarea');
+      input.id = 'question-input';
+      input.className = 'question-input';
+      input.placeholder = '请输入你想占卜的问题...\nEnter your question...';
+      input.rows = 4;
+      input.maxLength = 200;
+      var submitBtn = $('#btn-submit-question');
+      if (submitBtn && submitBtn.parentNode === container) {
+        container.insertBefore(input, submitBtn);
+      } else {
+        container.appendChild(input);
+      }
+      if (submitBtn) {
+        submitBtn.onclick = function () { showPool(); };
       }
     }
 
