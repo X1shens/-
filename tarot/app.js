@@ -1351,68 +1351,87 @@
   // ==================== Init ====================
   function init() {
     loadState();
-    // Welcome screen — btn-start behavior set dynamically by initWelcome()
 
-    // Question screen - back to welcome
-    $('#btn-question-back').addEventListener('click', function () {
+    // Null-safe event binding helper
+    function safeAdd(sel, event, fn) {
+      var el = $(sel);
+      if (el) el.addEventListener(event, fn);
+    }
+
+    // ---- Set up welcome screen btn-start FIRST (most critical) ----
+    var btnStart = $('#btn-start');
+    if (btnStart) {
+      btnStart.onclick = function () {
+        var profile = loadProfile();
+        if (!profile) showProfile();
+        else showQuestion();
+      };
+    }
+
+    // Question screen
+    safeAdd('#btn-question-back', 'click', function () {
       show('#welcome-screen');
-      $('#btn-start').onclick = function () { showQuestion(); };
+      var bs = $('#btn-start');
+      if (bs) bs.onclick = function () { showQuestion(); };
     });
-    $('#btn-submit-question').addEventListener('click', function () { showPool(); });
-    $('#question-input').addEventListener('keydown', function (e) {
+    safeAdd('#btn-submit-question', 'click', function () { showPool(); });
+    safeAdd('#question-input', 'keydown', function (e) {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); showPool(); }
     });
 
-    // Collection button
+    // Collection buttons
     $$('.btn-collection').forEach(function (btn) {
       btn.addEventListener('click', function () { showCollection(); });
     });
 
     // Modal close
-    $('#btn-close-modal').addEventListener('click', closeModal);
-    $('#card-modal').addEventListener('click', function (e) {
+    safeAdd('#btn-close-modal', 'click', closeModal);
+    var cardModal = $('#card-modal');
+    if (cardModal) cardModal.addEventListener('click', function (e) {
       if (e.target === this) closeModal();
     });
 
     // Screenshot
-    $('#btn-screenshot').addEventListener('click', takeScreenshot);
+    safeAdd('#btn-screenshot', 'click', takeScreenshot);
 
     // Action buttons
-    $('#btn-continue').addEventListener('click', continueDivination);
-    $('#btn-exit').addEventListener('click', exitApp);
+    safeAdd('#btn-continue', 'click', continueDivination);
+    safeAdd('#btn-exit', 'click', exitApp);
 
-    // Back from collection -> always go to welcome/home
-    $('#btn-collection-back').addEventListener('click', function () {
+    // Back from collection
+    safeAdd('#btn-collection-back', 'click', function () {
       show('#welcome-screen');
-      $('#btn-start').textContent = getAvailableDraws() > 0 ? '开始占卜 / Start Reading' : '查看图鉴 / View Collection';
-      $('#btn-start').onclick = function () {
-        if (getAvailableDraws() > 0) {
-          var profile = loadProfile();
-          if (!profile) showProfile();
-          else showQuestion();
-        } else {
-          showCollection();
-        }
-      };
+      var bs = $('#btn-start');
+      if (bs) {
+        bs.textContent = getAvailableDraws() > 0 ? '开始占卜 / Start Reading' : '查看图鉴 / View Collection';
+        bs.onclick = function () {
+          if (getAvailableDraws() > 0) {
+            var profile = loadProfile();
+            if (!profile) showProfile();
+            else showQuestion();
+          } else {
+            showCollection();
+          }
+        };
+      }
     });
 
-    // Detail back -> collection list
-    $('#btn-detail-back').addEventListener('click', function () { showCollection(); });
+    safeAdd('#btn-detail-back', 'click', function () { showCollection(); });
 
     // Ring carousel interaction
     initRingInteraction();
 
     // Confirm overlay
-    $('#btn-confirm-yes').addEventListener('click', confirmDraw);
-    $('#btn-confirm-cancel').addEventListener('click', hideConfirmDialog);
+    safeAdd('#btn-confirm-yes', 'click', confirmDraw);
+    safeAdd('#btn-confirm-cancel', 'click', hideConfirmDialog);
 
     // Profile screen
-    populateProfileDropdowns();
-    $('#btn-profile-save').addEventListener('click', handleProfileSave);
-    $('#btn-profile-skip').addEventListener('click', function () { showQuestion(); });
-    $('#btn-profile-back').addEventListener('click', function () { show('#welcome-screen'); });
+    try { populateProfileDropdowns(); } catch (e) { /* skip if dropdowns missing */ }
+    safeAdd('#btn-profile-save', 'click', handleProfileSave);
+    safeAdd('#btn-profile-skip', 'click', function () { showQuestion(); });
+    safeAdd('#btn-profile-back', 'click', function () { show('#welcome-screen'); });
 
-    // Init welcome
+    // Init welcome (may reconfigure btn-start for current session state)
     initWelcome();
   }
 
